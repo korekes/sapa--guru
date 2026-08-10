@@ -147,7 +147,7 @@
                             <table class="w-full text-xs text-slate-300">
                                 <thead>
                                     <tr class="border-b border-slate-700">
-                                        <th class="text-left py-2">name</th>
+                                        <th class="text-left py-2">nama</th>
                                         <th class="text-left py-2">nis</th>
                                         <th class="text-left py-2">no_absen</th>
                                         <th class="text-left py-2">jenis_kelamin</th>

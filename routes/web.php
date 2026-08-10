@@ -13,7 +13,9 @@ use App\Http\Controllers\{
     GuruController,
     MapelController,
     GuruMengajarController,
-    JadwalController
+    JadwalController,
+    NaikKelasController,
+    KenaikanKelasController
 };
 
 /*
@@ -76,7 +78,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     Route::get('/kelas/walikelas', [KelasController::class, 'editWalikelas'])
         ->name('kelas.walikelas');
-
+    Route::post('/kelas/walikelas/update',[KelasController::class,'updateWaliKelas'])
+        ->name('kelas.walikelas.update');
     Route::post('/kelas/walikelas', [KelasController::class, 'updateWalikelas'])
         ->name('kelas.walikelas.update');
 
@@ -84,12 +87,38 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     Route::post('/mapel/import',[MapelController::class,'import'])
         ->name('mapel.import');
+    Route::put('/mapel/{mapel}', [MapelController::class, 'update'])
+        ->name('mapel.update');
+    Route::get('/mapel/{mapel}/guru/{mengajar}',[MapelController::class,'showGuru'])
+        ->name('mapel.guru');
+    Route::get('/mapel/{mapel}/guru/{guruMengajar}',[MapelController::class, 'showGuru'])
+        ->name('mapel.showGuru');
 
     Route::resource('jadwal',JadwalController::class);
     Route::post('/jadwal/import',[JadwalController::class,'import'])   
         ->name('jadwal.import');
     Route::post('/jadwal/drop',[JadwalController::class,'drop'])
         ->name('jadwal.drop');
+
+    Route::prefix('naik-kelas')->group(function () {
+
+        Route::get('/', [NaikKelasController::class,'index'])
+            ->name('naik-kelas.index');
+
+        Route::post('/preview', [NaikKelasController::class,'preview'])
+            ->name('naik-kelas.preview');
+
+        Route::post('/proses', [NaikKelasController::class,'proses'])
+            ->name('naik-kelas.proses');
+
+    });
+
+    Route::prefix('kelas')->group(function () {
+        Route::get('{kelas}/kenaikan',[KenaikanKelasController::class,'index'])
+            ->name('kelas.kenaikan');
+        Route::post('{kelas}/kenaikan',[KenaikanKelasController::class,'proses'])
+            ->name('kelas.kenaikan.proses');
+    });
 });
 
 

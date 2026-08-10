@@ -82,16 +82,35 @@ class MapelController extends Controller
         return back();
     }
 
-    public function show($id)
+    public function show(Mapel $mapel)
     {
-        $mapel = Mapel::with([
-            'mengajar.guru.user',
-            'mengajar.kelas',
-        ])->findOrFail($id);
+        $guruMengajar = GuruMengajar::with([
+            'guru.user',
+            'kelas'
+        ])
+        ->where('mapel_id', $mapel->id)
+        ->orderBy('kelas_id')
+        ->get();
 
-        return view('mapel.show', compact('mapel'));
+        return view('mapel.show', compact(
+            'mapel',
+            'guruMengajar'
+        ));
     }
 
+    public function showGuru($mapelId, $guruMengajarId)
+    {
+        $guruMengajar = GuruMengajar::with([
+            'guru.user',
+            'kelas',
+            'mapel',
+            'jadwal'
+        ])
+        ->where('mapel_id', $mapelId)
+        ->findOrFail($guruMengajarId);
+
+        return view('mapel.show-guru', compact('guruMengajar'));
+    }
     public function import(Request $request)
     {
         $request->validate([
@@ -103,5 +122,23 @@ class MapelController extends Controller
         return redirect()
             ->route('mapel.index')
             ->with('success', 'Data mapel berhasil diimport');
+    }
+
+    public function edit(Mapel $mapel)
+    {
+        return view('mapel.edit', compact('mapel'));  
+    }
+
+    public function update(Request $request, Mapel $mapel)
+    {
+        $request->validate([
+            'nama_mapel' => 'required|string|max:255',
+        ]);
+
+        $mapel->update([
+            'nama_mapel' => $request->nama_mapel,
+        ]);
+
+        return back()->with('success', 'Nama mata pelajaran berhasil diperbarui.');
     }
 }

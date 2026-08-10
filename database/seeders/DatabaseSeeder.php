@@ -24,6 +24,12 @@ class DatabaseSeeder extends Seeder
             'role' => 'admin'
         ]);
         User::factory()->create([
+            'name' => 'Aries Budiyono, S.Pd., M.T',
+            'nip' => '197607112003121006',
+            'password' => '111111',
+            'role' => 'admin'
+        ]);
+        User::factory()->create([
             'name' => 'heka',
             'nip' => '0987654',
             'password' => '222222',

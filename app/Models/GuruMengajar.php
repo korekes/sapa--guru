@@ -28,4 +28,14 @@ class GuruMengajar extends Model
     {
         return $this->belongsTo(Mapel::class);
     }
+
+    public function jadwal()
+    {
+        return $this->hasMany(Jadwal::class, 'guru_mengajar_id');
+    }
+
+    public function jadwals()
+    {
+        return $this->hasMany(Jadwal::class, 'guru_mengajar_id');
+    }
 }

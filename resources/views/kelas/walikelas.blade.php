@@ -50,9 +50,9 @@
                                 </label>
 
                                 <input type="text"
-                                    readonly
-                                    value="{{ $k->nama_kelas }}"
-                                    class="w-full rounded-xl bg-slate-900 border border-slate-700 text-white">
+                                    name="kelas[{{ $k->id }}][nama_kelas]"
+                                    value="{{ old('kelas.'.$k->id.'.nama_kelas', $k->nama_kelas) }}"
+                                    class="w-full rounded-xl bg-slate-900 border border-slate-700 text-white px-4 py-3">
                             </div>
 
                             <div>
@@ -60,7 +60,7 @@
                                     Wali Kelas
                                 </label>
 
-                                <select name="guru_id[{{ $k->id }}]"
+                                <select name="kelas[{{ $k->id }}][wali_kelas]"
                                     class="guru-select w-full rounded-xl bg-slate-900 border border-slate-700 text-white">
 
                                     <option value=""></option>

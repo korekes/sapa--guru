@@ -109,23 +109,40 @@ class KelasController extends Controller
         return view('kelas.walikelas', compact('kelas', 'guru'));
     }
 
-    public function updateWalikelas(Request $request)
+    public function updateWaliKelas(Request $request)
     {
         $request->validate([
-            'kelas_id' => 'required|exists:kelas,id',
-            'guru_id' => 'required|exists:gurus,id',
+            'kelas' => 'required|array',
         ]);
 
-        $guru = Guru::with('user')->findOrFail($request->guru_id);
+        foreach($request->kelas as $id => $data)
+        {
+            $kelas = Kelas::find($id);
+            if($kelas)
+            {
+                $kelas->update([
+                    'nama_kelas' => $data['nama_kelas'],
+                    'wali_kelas' => $data['wali_kelas'],
+                ]);
+            }
+        }
 
-        $kelas = Kelas::findOrFail($request->kelas_id);
+        return back()
+            ->with('success','Data kelas dan wali kelas berhasil diperbarui.');
+    }
 
-        $kelas->wali_kelas = $guru->user->name;
-        $kelas->save();
+    public function settingWali()
+    {
+        $kelas = Kelas::orderBy('nama_kelas')->get();
 
-        return back()->with(
-            'success',
-            'Wali kelas '.$kelas->nama_kelas.' berhasil diperbarui'
+        $guru = Guru::with('user')
+            ->orderBy('id')
+            ->get();
+
+
+        return view(
+            'kelas.wali',
+            compact('kelas','guru')
         );
     }
 }

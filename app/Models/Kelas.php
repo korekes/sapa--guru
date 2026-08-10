@@ -8,16 +8,19 @@ class Kelas extends Model
 {
     protected $table = 'kelas';
 
-    protected $fillable = ['nama_kelas', 'wali_kelas'];
+    protected $fillable = [
+        'nama_kelas',
+        'wali_kelas',
+    ];
 
     public function siswa()
     {
-        return $this->hasMany(\App\Models\Siswa::class);
+        return $this->hasMany(Siswa::class, 'kelas_id');
     }
 
     public function wali()
     {
-        return $this->belongsTo(User::class, 'wali_kelas');
+        return $this->belongsTo(User::class, 'wali_kelas', 'name');
     }
 
     public function absensi()
@@ -38,5 +41,26 @@ class Kelas extends Model
     public function mengajar()
     {
         return $this->hasMany(GuruMengajar::class);
+    }
+
+    public function riwayatKelas()
+    {
+        return $this->hasMany(RiwayatKelas::class);
+    }
+
+    public function riwayatKenaikanAsal()
+    {
+        return $this->hasMany(
+            RiwayatKenaikanKelas::class,
+            'kelas_asal_id'
+        );
+    }
+
+    public function riwayatKenaikanTujuan()
+    {
+        return $this->hasMany(
+            RiwayatKenaikanKelas::class,
+            'kelas_tujuan_id'
+        );
     }
 }

@@ -14,23 +14,69 @@ class JadwalController extends Controller
     /**
      * Display a listing of the resource.
      * Bisa difilter per blok minggu via query string: ?minggu=produktif / ?minggu=normada
+     * Ditampilkan sebagai tabel jadwal (aSc-style) per kelas.
      */
     public function index(Request $request)
     {
         $minggu = $request->query('minggu', Jadwal::MINGGU_PRODUKTIF);
 
-        $jadwal = Jadwal::with([
+        $jadwalAll = Jadwal::with([
             'mengajar.guru.user',
             'mengajar.mapel',
             'mengajar.kelas',
         ])
         ->minggu($minggu)
-        ->orderByRaw("FIELD(hari, 'Senin','Selasa','Rabu','Kamis','Jumat','Sabtu')")
-        ->orderBy('jam_mulai')
-        ->get()
-        ->groupBy('hari');
+        ->get();
 
-        return view('jadwal.index', compact('jadwal', 'minggu'));
+        // Susun jadwal per kelas → per hari → per jam pelajaran,
+        // supaya bisa langsung dipetakan ke tabel aSc di view tanpa logic tambahan di blade.
+        $jamPelajaran = [
+            ['no'=>1,  'mulai'=>'07:00','selesai'=>'07:45'],
+            ['no'=>2,  'mulai'=>'07:45','selesai'=>'08:30'],
+            ['no'=>3,  'mulai'=>'08:30','selesai'=>'09:15'],
+            ['no'=>4,  'mulai'=>'09:15','selesai'=>'10:00'],
+            ['no'=>5,  'mulai'=>'10:15','selesai'=>'11:00'],
+            ['no'=>6,  'mulai'=>'11:00','selesai'=>'11:45'],
+            ['no'=>7,  'mulai'=>'11:45','selesai'=>'12:30'],
+            ['no'=>8,  'mulai'=>'13:00','selesai'=>'13:40'],
+            ['no'=>9,  'mulai'=>'13:40','selesai'=>'14:20'],
+            ['no'=>10, 'mulai'=>'14:20','selesai'=>'15:05'],
+            ['no'=>11, 'mulai'=>'15:05','selesai'=>'15:50'],
+        ];
+
+        // Map jam_mulai -> nomor JP, supaya bisa cocokkan jadwal tersimpan ke kolom JP yang tepat
+        $jpByTime = [];
+        foreach ($jamPelajaran as $jp) {
+            $jpByTime[$jp['mulai']] = $jp['no'];
+        }
+
+        $kelasList = Kelas::orderBy('nama_kelas')->get();
+
+        // Struktur akhir: [ namaKelas => [ "Hari|JPNo" => Jadwal ] ]
+        $jadwalPerKelas = [];
+
+        foreach ($jadwalAll as $j) {
+            $namaKelas = $j->kelas->nama_kelas ?? ($j->mengajar->kelas->nama_kelas ?? null);
+            if (!$namaKelas) {
+                continue;
+            }
+
+            $jamMulaiShort = substr($j->jam_mulai, 0, 5);
+            $jpNo = $jpByTime[$jamMulaiShort] ?? null;
+            if (!$jpNo) {
+                continue; // jam tidak cocok dengan slot JP standar, dilewati dari tabel
+            }
+
+            $key = $j->hari . '|' . $jpNo;
+            $jadwalPerKelas[$namaKelas][$key] = $j;
+        }
+
+        return view('jadwal.index', compact(
+            'jadwalPerKelas',
+            'kelasList',
+            'jamPelajaran',
+            'minggu',
+        ));
     }
 
     /**

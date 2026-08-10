@@ -94,20 +94,34 @@
 
                             <div class="flex items-center gap-2">
 
+                                {{-- Detail --}}
                                 <a href="{{ route('mapel.show',$m->id) }}"
-                                   class="px-3 py-1.5 text-xs rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white">
+                                class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition">
+                                    <i class="fas fa-eye"></i>
                                     Detail
                                 </a>
 
+                                {{-- Edit --}}
+                                <button
+                                    onclick="openEditModal(
+                                        {{ $m->id }},
+                                        '{{ $m->nama_mapel }}'
+                                    )"
+                                    class="px-3 py-1.5 text-xs rounded-lg bg-amber-500 hover:bg-amber-400 text-white">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+
+                                {{-- Hapus --}}
                                 <form action="{{ route('mapel.destroy',$m->id) }}"
-                                      method="POST"
-                                      onsubmit="return confirm('Yakin ingin menghapus mapel ini?')">
+                                    method="POST"
+                                    onsubmit="return confirm('Yakin ingin menghapus mata pelajaran ini?')">
 
                                     @csrf
                                     @method('DELETE')
 
                                     <button type="submit"
-                                            class="px-3 py-1.5 text-xs rounded-lg bg-red-600 hover:bg-red-500 text-white">
+                                            class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-semibold transition">
+                                        <i class="fas fa-trash"></i>
                                         Hapus
                                     </button>
 
@@ -144,4 +158,141 @@
         </div>
 
     </div>
+
+
+
+{{-- Modal Edit --}}
+<div id="editModal"
+    class="fixed inset-0 z-50 hidden">
+
+    {{-- Background --}}
+    <div onclick="closeEditModal()"
+        class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+
+    {{-- Content --}}
+    <div class="relative flex items-center justify-center min-h-screen p-4">
+
+        <div
+            id="modalCard"
+            class="w-full max-w-md bg-[#111827] border border-slate-800 rounded-3xl shadow-2xl scale-95 opacity-0 transition-all duration-200">
+
+            {{-- Header --}}
+            <div class="flex items-center justify-between px-6 py-5 border-b border-slate-800">
+
+                <div class="flex items-center gap-3">
+
+                    <div class="w-11 h-11 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400">
+                        <i class="fas fa-edit"></i>
+                    </div>
+
+                    <div>
+
+                        <h3 class="font-bold text-white">
+                            Edit Mata Pelajaran
+                        </h3>
+
+                        <p class="text-xs text-slate-500">
+                            Ubah nama mata pelajaran
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <button onclick="closeEditModal()"
+                    class="w-9 h-9 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition">
+
+                    <i class="fas fa-times"></i>
+
+                </button>
+
+            </div>
+
+            {{-- Form --}}
+            <form id="editForm" method="POST">
+
+                @csrf
+                @method('PUT')
+
+                <div class="p-6">
+
+                    <label class="block text-xs uppercase tracking-wider text-slate-400 mb-2">
+                        Nama Mata Pelajaran
+                    </label>
+
+                    <input
+                        id="editNamaMapel"
+                        type="text"
+                        name="nama_mapel"
+                        required
+                        class="w-full rounded-xl bg-slate-900 border border-slate-700 text-white px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition">
+
+                </div>
+
+                <div class="flex justify-end gap-3 px-6 py-5 border-t border-slate-800 bg-slate-900/40 rounded-b-3xl">
+
+                    <button
+                        type="button"
+                        onclick="closeEditModal()"
+                        class="px-5 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-semibold transition">
+
+                        Batal
+
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="px-5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-semibold shadow-lg shadow-orange-900/30 transition">
+
+                        <i class="fas fa-save mr-2"></i>
+                        Simpan
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+const modal = document.getElementById("editModal");
+const card = document.getElementById("modalCard");
+
+function openEditModal(id, nama)
+{
+    document.getElementById("editNamaMapel").value = nama;
+
+    document.getElementById("editForm").action =
+        "{{ url('/mapel') }}/" + id;
+
+    modal.classList.remove("hidden");
+
+    setTimeout(() => {
+        card.classList.remove("scale-95","opacity-0");
+        card.classList.add("scale-100","opacity-100");
+    },10);
+}
+
+function closeEditModal()
+{
+    card.classList.remove("scale-100","opacity-100");
+    card.classList.add("scale-95","opacity-0");
+
+    setTimeout(() => {
+        modal.classList.add("hidden");
+    },200);
+}
+
+// ESC untuk menutup
+document.addEventListener("keydown", function(e){
+    if(e.key === "Escape"){
+        closeEditModal();
+    }
+});
+</script>
 </x-app-layout>
